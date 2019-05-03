@@ -1,62 +1,51 @@
 require_relative '../converter.rb'
 
-RSpec.describe Converter do
+describe Converter do
   let(:converter) { described_class.new(json_path) }
   let(:html_result_path) { 'tmp/index.html' }
   let(:dirname) { File.dirname(html_result_path) }
+  let(:json_path) { "spec/fixtures/source#{ task_number }.json" }
+  let(:expected_html) { "spec/fixtures/index#{ task_number }.html" }
 
   before { FileUtils.mkdir_p(dirname) }
   after { FileUtils.rm_rf(dirname) }
 
+  shared_examples 'parsable_json' do
+    it 'создаст html файл' do
+      expect(File.exist?(html_result_path)).to be(false)
+
+      converter.to_html(html_result_path)
+
+      expect(File.exist?(html_result_path)).to be(true)
+
+      files_identical = FileUtils.compare_file(html_result_path, expected_html)
+      expect(files_identical).to be(true)
+    end
+  end
+
   describe '#to_html' do
-    subject(:create_html) { converter.to_html(html_result_path) }
+    xcontext 'задание 1' do
+      let(:task_number) { 1 }
 
-    xcontext 'первое задание' do
-      let(:json_path) { 'spec/fixtures/source1.json' }
-      let(:expected_html) { 'spec/fixtures/index1.html' }
-
-      it 'создаст html файл' do
-        expect(File.exist?(html_result_path)).to eq(false)
-
-        create_html
-
-        expect(File.exist?(html_result_path)).to eq(true)
-
-        files_identical = FileUtils.compare_file(html_result_path, expected_html)
-        expect(files_identical).to eq(true)
-      end
+      it_behaves_like 'parsable_json'
     end
 
-    context 'второе задание' do
-      let(:json_path) { 'spec/fixtures/source2.json' }
-      let(:expected_html) { 'spec/fixtures/index2.html' }
+    xcontext 'задание 2' do
+      let(:task_number) { 2 }
 
-      it 'создаст html файл' do
-        expect(File.exist?(html_result_path)).to eq(false)
-
-        create_html
-
-        expect(File.exist?(html_result_path)).to eq(true)
-
-        files_identical = FileUtils.compare_file(html_result_path, expected_html)
-        expect(files_identical).to eq(true)
-      end
+      it_behaves_like 'parsable_json'
     end
 
-    context 'третье задание' do
-      let(:json_path) { 'spec/fixtures/source3.json' }
-      let(:expected_html) { 'spec/fixtures/index3.html' }
+    context 'задание 3' do
+      let(:task_number) { 3 }
 
-      it 'создаст html файл' do
-        expect(File.exist?(html_result_path)).to eq(false)
+      it_behaves_like 'parsable_json'
+    end
 
-        create_html
+    context 'задание 4' do
+      let(:task_number) { 4 }
 
-        expect(File.exist?(html_result_path)).to eq(true)
-
-        files_identical = FileUtils.compare_file(html_result_path, expected_html)
-        expect(files_identical).to eq(true)
-      end
+      it_behaves_like 'parsable_json'
     end
   end
 end

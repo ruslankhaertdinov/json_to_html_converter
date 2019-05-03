@@ -10,32 +10,29 @@ class Converter
   end
 
   def to_html(output_path)
-    File.write(output_path, "#{ html_string }\n")
+    File.write(output_path, "#{ handle_content(parsed_json) }\n")
   end
 
   private
 
-  def html_string
-    if parsed_json.size > 1
-      multiple_elements_string
+  def handle_content(content)
+    if content.is_a?(Array)
+      "<ul>#{ ul(content) }</ul>"
     else
-      single_element_string
+      content
     end
   end
 
-  def multiple_elements_string
-    li_list = elements_list.map { |el| "<li>#{ el }</li>" }.join
-    "<ul>#{ li_list }</ul>"
+  def ul(content)
+    content.flat_map do |opts|
+      "<li>#{ li(opts) }</li>"
+    end.join
   end
 
-  def single_element_string
-    elements_list.join
-  end
-
-  def elements_list
-    parsed_json.map do |opts|
-      opts.map { |tag, content| "<#{ tag }>#{ content }</#{ tag }>" }.join
-    end
+  def li(opts)
+    opts.map do |tag, content|
+      "<#{ tag }>#{ handle_content(content) }</#{ tag }>"
+    end.join
   end
 
   def parsed_json
