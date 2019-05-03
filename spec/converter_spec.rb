@@ -11,9 +11,25 @@ RSpec.describe Converter do
   describe '#to_html' do
     subject(:create_html) { converter.to_html(html_result_path) }
 
-    context 'первое задание' do
+    xcontext 'первое задание' do
       let(:json_path) { 'spec/fixtures/source1.json' }
       let(:expected_html) { 'spec/fixtures/index1.html' }
+
+      it 'создаст html файл' do
+        expect(File.exist?(html_result_path)).to eq(false)
+
+        create_html
+
+        expect(File.exist?(html_result_path)).to eq(true)
+
+        files_identical = FileUtils.compare_file(html_result_path, expected_html)
+        expect(files_identical).to eq(true)
+      end
+    end
+
+    context 'второе задание' do
+      let(:json_path) { 'spec/fixtures/source2.json' }
+      let(:expected_html) { 'spec/fixtures/index2.html' }
 
       it 'создаст html файл' do
         expect(File.exist?(html_result_path)).to eq(false)

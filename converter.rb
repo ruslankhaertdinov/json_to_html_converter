@@ -1,4 +1,5 @@
 require 'json'
+require 'byebug'
 
 class Converter
   attr_reader :json_path
@@ -15,7 +16,11 @@ class Converter
   private
 
   def html_string
-    parsed_json.map { |h| "<h1>#{ h['title'] }</h1><p>#{ h['body'] }</p>" }.join
+    parsed_json.flat_map do |opts|
+      opts.map do |tag, content|
+        "<#{ tag }>#{ content }</#{ tag }>"
+      end
+    end.join
   end
 
   def parsed_json
