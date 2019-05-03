@@ -2,18 +2,19 @@ require 'json'
 require 'byebug'
 
 class Converter
-  attr_reader :json_path
-  private :json_path
-
   CSS_CLASS_FORMAT = /\.\w+-*\w*/
   CSS_ID_FORMAT = /#\w+-*\w*/
   CSS_TAG_FORMAT = /^\w+/
 
-  def initialize(json_path)
-    @json_path = json_path
+  attr_reader :source_path, :output_path
+  private :source_path, :output_path
+
+  def initialize(source_path, output_path)
+    @source_path = source_path
+    @output_path = output_path
   end
 
-  def to_html(output_path)
+  def call
     File.write(output_path, "#{ handle_content(parsed_json) }\n")
   end
 
@@ -36,8 +37,8 @@ class Converter
   end
 
   def handle_hash(opts)
-    opts.map do |tag, content|
-      "<#{ opening_tag(tag) }>#{ handle_content(content) }</#{ extract_tag(tag) }>"
+    opts.map do |key, value|
+      "<#{ opening_tag(key) }>#{ handle_content(value) }</#{ extract_tag(key) }>"
     end.join
   end
 
@@ -49,18 +50,18 @@ class Converter
     string.scan(CSS_TAG_FORMAT)[0]
   end
 
-  def extract_classes(string)
-    list = string.scan(CSS_CLASS_FORMAT).map { |str| str[1..-1] }
-    return nil if list.empty?
-
-    "class=\"#{ list.join(' ') }\""
-  end
-
   def extract_id(string)
     id = string.scan(CSS_ID_FORMAT).map { |str| str[1..-1] }[0]
     return nil if id.nil?
 
-    "id=\"#{ id }\""
+    %[id="#{ id }"]
+  end
+
+  def extract_classes(string)
+    list = string.scan(CSS_CLASS_FORMAT).map { |str| str[1..-1] }
+    return nil if list.empty?
+
+    %[class="#{ list.join(' ') }"]
   end
 
   def handle_string(content)
@@ -68,6 +69,6 @@ class Converter
   end
 
   def parsed_json
-    @parsed_json ||= JSON.load(File.read(json_path))
+    @parsed_json ||= JSON.load(File.read(source_path))
   end
 end
