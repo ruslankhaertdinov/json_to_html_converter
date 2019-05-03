@@ -47,5 +47,11 @@ describe Converter do
 
       it_behaves_like 'parsable_json'
     end
+
+    context 'задание 5' do
+      let(:task_number) { 5 }
+
+      it_behaves_like 'parsable_json'
+    end
   end
 end
