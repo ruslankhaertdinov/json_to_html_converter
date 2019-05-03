@@ -42,5 +42,21 @@ RSpec.describe Converter do
         expect(files_identical).to eq(true)
       end
     end
+
+    context 'третье задание' do
+      let(:json_path) { 'spec/fixtures/source3.json' }
+      let(:expected_html) { 'spec/fixtures/index3.html' }
+
+      it 'создаст html файл' do
+        expect(File.exist?(html_result_path)).to eq(false)
+
+        create_html
+
+        expect(File.exist?(html_result_path)).to eq(true)
+
+        files_identical = FileUtils.compare_file(html_result_path, expected_html)
+        expect(files_identical).to eq(true)
+      end
+    end
   end
 end

@@ -16,11 +16,26 @@ class Converter
   private
 
   def html_string
-    parsed_json.flat_map do |opts|
-      opts.map do |tag, content|
-        "<#{ tag }>#{ content }</#{ tag }>"
-      end
-    end.join
+    if parsed_json.size > 1
+      multiple_elements_string
+    else
+      single_element_string
+    end
+  end
+
+  def multiple_elements_string
+    li_list = elements_list.map { |el| "<li>#{ el }</li>" }.join
+    "<ul>#{ li_list }</ul>"
+  end
+
+  def single_element_string
+    elements_list.join
+  end
+
+  def elements_list
+    parsed_json.map do |opts|
+      opts.map { |tag, content| "<#{ tag }>#{ content }</#{ tag }>" }.join
+    end
   end
 
   def parsed_json
