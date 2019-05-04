@@ -4,9 +4,7 @@ describe Converter do
   SKIP_MESSAGE = 'неактуально из-за изменения требований'.freeze
 
   let(:converter) { described_class.new(source_path, output_path) }
-  let(:source_path) { "spec/fixtures/source#{ task_number }.json" }
   let(:expected_html) { "spec/fixtures/index#{ task_number }.html" }
-  let(:output_path) { 'tmp/index.html' }
   let(:dirname) { File.dirname(output_path) }
 
   def delete_tmp_files
@@ -23,15 +21,40 @@ describe Converter do
   end
 
   shared_examples 'exportable_json' do
-    it 'создаст html файл' do
-      expect(File.exist?(output_path)).to be(false)
+    context 'аргументы валидные' do
+      let(:source_path) { "spec/fixtures/source#{ task_number }.json" }
+      let(:output_path) { 'tmp/index.html' }
 
-      converter.call
+      it 'создаст html файл' do
+        expect(File.exist?(output_path)).to be(false)
 
-      expect(File.exist?(output_path)).to be(true)
+        converter.call
 
-      files_identical = FileUtils.compare_file(output_path, expected_html)
-      expect(files_identical).to be(true)
+        expect(File.exist?(output_path)).to be(true)
+
+        files_identical = FileUtils.compare_file(output_path, expected_html)
+        expect(files_identical).to be(true)
+      end
+    end
+
+    context 'невалидные аргументы' do
+      context 'источник не существует' do
+        let(:source_path) { "spec/fixtures/unexisted_source.json" }
+        let(:output_path) { 'tmp/index.html' }
+
+        it 'вызовет ошибку' do
+          expect { converter.call }.to raise_error(Errno::ENOENT)
+        end
+      end
+
+      context 'источник имеет некорректный формат' do
+        let(:source_path) { "spec/fixtures/invalid_source.json" }
+        let(:output_path) { 'tmp/index.html' }
+
+        it 'вызовет ошибку' do
+          expect { converter.call }.to raise_error(JSON::ParserError)
+        end
+      end
     end
   end
 
